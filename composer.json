@@ -1,0 +1,24 @@
+{
+    "name": "hasokeyk/gedik-yatirim-php-api",
+    "authors": [
+        {
+            "name": "Hasan Yüksektepe",
+            "email": "hasanhasokeyk@hotmail.com",
+            "homepage": "https://hayatikodla.net",
+            "role": "Developer"
+        }
+    ],
+    "type": "library",
+    "keywords": ["hisse","hisse senedi"],
+    "homepage": "https://hayatikodla.net",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "require": {
+        "ratchet/pawl": "^0.3.5",
+        "guzzlehttp/guzzle":"^7.0.1",
+        "php": ">=7.4.0"
+    },
+    "autoload": {
+        "files": ["src/gedik_yatirim.php"]
+    }
+}
