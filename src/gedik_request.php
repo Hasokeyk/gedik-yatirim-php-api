@@ -26,11 +26,10 @@
             
             $cookies_array = [
                 'mid'       => 'YB2r4AABAAERcl5ESNxLjr_tt4Q5',
-                'csrftoken' => $this->get_csrftoken(),
             ];
             
             if($session_id === true){
-                $cookies_array['sessionid'] = $this->get_session_id();
+                $cookies_array['sessionid'] = '';
             }
             
             if($array == false){
@@ -124,5 +123,23 @@
             }
             
         }
+        
+        //KELİME BAŞLIYORSA
+        function start_with($samanlik, $igne){
+            $length = strlen($igne);
+            return (substr($samanlik, 0, $length) === $igne);
+        }
+        //KELİME BAŞLIYORSA
+    
+        //KELİME BİTİYORSA
+        function end_with($samanlik, $igne){
+            $length = strlen($igne);
+            if($length == 0){
+                return true;
+            }
+        
+            return (substr($samanlik, -$length) === $igne);
+        }
+        //KELİME BİTİYORSA
         
     }
