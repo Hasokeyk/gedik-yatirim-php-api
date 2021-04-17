@@ -1,2 +1,5 @@
+.idea/
+vendor/
 index.php
-index.php
+src/cache/*/
+assets/
