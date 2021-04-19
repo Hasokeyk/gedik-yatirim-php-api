@@ -4,48 +4,33 @@
     namespace gedik_yatirim;
     
     require "gedik_request.php";
+    require "gedik_login.php";
+    require "gedik_transactions.php";
     
-    class gedik_yatirim extends gedik_request{
+    //require "gedik_websocket.php";
+    
+    class gedik_yatirim{
         
-        public $username = null;
-        public $password = null;
+        public $functions = null;
+        //public $websocket    = null;
+        public $request      = null;
+        public $login        = null;
+        public $transactions = null;
         
         public function __construct($username = null, $password = null){
             
-            $this->username = $username;
-            $this->password = $password;
+            $this->functions = (object) [
+                'request'      => new gedik_request($username, $password, $this->functions),
+                'login'        => new gedik_login($username, $password, $this->functions),
+                'transactions' => new gedik_transactions($username, $password, $this->functions),
+                'websocket'    => new gedik_websocket($username, $password, $this->functions),
+            ];
             
-        }
-        
-        public function login($username = null, $password = null, $user_type = 'VIEWER'){
+            $this->request      = new gedik_request($username, $password, $this->functions);
+            $this->login        = new gedik_login($username, $password, $this->functions);
+            $this->transactions = new gedik_transactions($username, $password, $this->functions);
+            $this->websocket    = new gedik_websocket($username, $password, $this->functions);
             
-            $username = $username??$this->username;
-            $password = $password??$this->password;
-            
-            $cache = $this->cache('sessionid');
-            if(!$cache){
-                $url       = 'https://web.gediktrader.com/v/controllers/gedikSiteLogin';
-                $post_data = [
-                    'username' => $username,
-                    'password' => $password,
-                    'userType' => $user_type,
-                ];
-                $json      = $this->request($url, 'POST', $post_data);
-                $body      = json_decode($json['body']);
-                if($body->loginStatusTO->status){
-                    foreach($json['headers']['Set-Cookie'] as $cookie){
-                        if($this->start_with($cookie, 'JSESSIONID')){
-                            preg_match('|JSESSIONID=(.*?);|is', $cookie, $session_id);
-                            $this->cache('sessionid', [$session_id[1]]);
-                            break;
-                        }
-                    }
-                    return [$session_id[1]];
-                }
-            }else{
-                return $cache;
-            }
-            return false;
         }
         
     }

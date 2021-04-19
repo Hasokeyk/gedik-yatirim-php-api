@@ -12,24 +12,25 @@
         public $cache_prefix = 'gedik';
         public $cache_time   = 10; //Minute
         
-        public $user_agent = 'Instagram 177.0.0.30.119 Android (22/5.1.1; 160dpi; 540x960; Google/google; google Pixel 2; x86; qcom; tr_TR; 276028050)';
+        public $user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.72 Safari/537.36';
         
         public $username;
         public $password;
+        public $functions;
         
-        function __construct($username, $password){
-            $this->username = $username;
-            $this->password = $password;
+        function __construct($username, $password, $functions = null){
+            $this->username  = $username;
+            $this->password  = $password;
+            $this->functions = $functions;
         }
         
         public function create_cookie($array = false, $session_id = true){
             
-            $cookies_array = [
-                'mid'       => 'YB2r4AABAAERcl5ESNxLjr_tt4Q5',
+            $cookies_array = [//'mid' => 'YB2r4AABAAERcl5ESNxLjr_tt4Q5',
             ];
             
             if($session_id === true){
-                $cookies_array['sessionid'] = '';
+                $cookies_array['JSESSIONID'] = $this->get_session_id();;
             }
             
             if($array == false){
@@ -44,6 +45,22 @@
             
         }
         
+        public function get_session_id($username = null){
+            
+            $username       = $username??$this->username;
+            $this->username = $username;
+            
+            $cookie = $this->cache('sessionid');
+            if($cookie == false){
+                $session_id = 0;
+            }
+            else{
+                $session_id = $cookie[0];
+            }
+            
+            return $session_id;
+        }
+        
         public function cache($name, $desc = false, $json = false){
             
             if(!file_exists($this->cache_path.$this->username)){
@@ -51,7 +68,7 @@
             }
             
             $cache_file_path = $this->cache_path.$this->username.'/';
-            $cache_file      = $cache_file_path.($name.'.json');
+            $cache_file      = realpath($cache_file_path.($name.'.json'));
             
             if(file_exists($cache_file) and time() <= strtotime('+'.$this->cache_time.' minute', filemtime($cache_file))){
                 return json_decode(file_get_contents($cache_file));
@@ -84,20 +101,27 @@
             }
             
             $headers_default = [
-                'User-Agent' => $this->user_agent,
+                'User-Agent'       => $this->user_agent,
+                'Host'             => 'web.gediktrader.com',
+                'X-Requested-With' => 'XMLHttpRequest',
+                'Referer'          => 'https://web.gediktrader.com/v/',
             ];
             
-            $headers = $header??$headers_default;
+            if(is_array($header)){
+                foreach($header as $h_k => $h_v){
+                    $headers_default[$h_k] = $h_v;
+                }
+            }
             
             if($user_cookie == true){
                 $cookie            = $cookie??$this->create_cookie(false, $user_cookie);
-                $headers['Cookie'] = $cookie;
+                $headers_default['Cookie'] = $cookie;
             }
             
             try{
                 $client = new \GuzzleHttp\Client([
                     'verify'  => false,
-                    'headers' => $headers,
+                    'headers' => $headers_default,
                 ]);
                 
                 if($type == 'POST'){
@@ -124,20 +148,28 @@
             
         }
         
+        public function get_wss_id(){
+            $wss_id = $this->cache('wss_id');
+            if(is_array($wss_id)){
+                return $wss_id[0];
+            }
+            return 0;
+        }
+        
         //KELİME BAŞLIYORSA
         function start_with($samanlik, $igne){
             $length = strlen($igne);
             return (substr($samanlik, 0, $length) === $igne);
         }
         //KELİME BAŞLIYORSA
-    
+        
         //KELİME BİTİYORSA
         function end_with($samanlik, $igne){
             $length = strlen($igne);
             if($length == 0){
                 return true;
             }
-        
+            
             return (substr($samanlik, -$length) === $igne);
         }
         //KELİME BİTİYORSA
